@@ -111,5 +111,43 @@ int main () {
   }
   std::cout << std::endl;
 
+  // Second test case: What if we DO NOT want to transpose the input matrices?
+
+  double aa[] = {
+    -0.0263766, 0.0233982,
+     0.150229, -0.156083,
+    -0.313059,  0.437434,
+     0.200632, -0.657155,
+     0.281068,  0.549301,
+    -0.650341, -0.221726,
+     0.537914,  0.00200615,
+    -0.214473,  0.0305288,
+     0.0344071,-0.00770386};
+
+  double bb[] = {
+    -12.8,     -50.724,
+    -57.1678, -356.35};
+
+  // These values correspond to the TRANSPOSED versions of the matrices.
+
+  ta = 'T'; // State that now, the input WILL be in row-wise ordering.
+  tb = 'T'; // State that now, the input WILL be in row-wise ordering.
+  lda = std::max(1,kk);
+  ldb = std::max(1,nn);
+  ldc = std::max(1,mm);
+
+  dgemm_(&ta, &tb, &mm, &nn, &kk, &alpha, aa, &lda, bb, &ldb, &beta, cct.data(), &ldc);
+
+  std::cout << "cct =" <<std::endl;
+  for (int ii = 0; ii < kk; ++ii) {
+    for (int jj = 0; jj < mm; ++jj) {
+      std::cout << std::setw(12) << cct[ii*mm + jj];
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+
+  // The product matrix WILL ALWAYS BE TRANSPOSED! ;)
+
   return EXIT_SUCCESS;
 }
