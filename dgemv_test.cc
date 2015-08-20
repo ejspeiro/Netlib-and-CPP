@@ -100,5 +100,24 @@ int main () {
   }
   std::cout << std::endl;
 
+  std::cout << "yy =" << std::endl;
+  for (int ii = 0; ii < mm; ++ii) {
+    std::cout << std::setw(12) << yy[ii] << std::endl;
+  }
+  std::cout << std::endl;
+
+  // Execute matrix-vector multiplication.
+
+  double alpha{-1.0}; // Scalar for the matrix.
+  double beta{1.0};   // Scalar for the first vector.
+
+  dgemv_(&trans, &mm, &nn, &alpha, aat.data(), &lda, xx.data(), &incx, &beta, yy.data(), &incy);
+
+  std::cout << "yy =" << std::endl;
+  for (int ii = 0; ii < mm; ++ii) {
+    std::cout << std::setw(12) << yy[ii] << std::endl;
+  }
+  std::cout << std::endl;
+
   return EXIT_SUCCESS;
 }
