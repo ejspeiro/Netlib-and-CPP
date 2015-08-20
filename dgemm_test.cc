@@ -56,7 +56,7 @@ int main () {
   int nn{2};  // Cols of aa and cols of cc.
   int kk{2};  // Cols of aa and rows of bb.
 
-  // First test case: matrices with transposed data:
+  // First test case: matrices with transposed data.
 
   std::vector<double> aat{
     -0.0263766,  0.150229, -0.313059,  0.200632, 0.281068, -0.650341, 0.537914,  -0.214473,   0.0344071,
@@ -78,7 +78,7 @@ int main () {
   std::cout << "aat =" << std::endl;
   for (int ii = 0; ii < nn; ++ii) {
     for (int jj = 0; jj < mm; ++jj) {
-      std::cout << std::setw(12) << aat[ii*mm + jj] << ' ';
+      std::cout << std::setw(12) << aat[ii*mm + jj];
     }
     std::cout << std::endl;
   }
@@ -87,7 +87,7 @@ int main () {
   std::cout << "bbt =" << std::endl;
   for (int ii = 0; ii < nn; ++ii) {
     for (int jj = 0; jj < kk; ++jj) {
-      std::cout << std::setw(12) << bbt[ii*kk + jj] << ' ';
+      std::cout << std::setw(12) << bbt[ii*kk + jj];
     }
     std::cout << std::endl;
   }
