@@ -13,7 +13,7 @@ dgemm_test.o: dgemm_test.cc
 	g++ -std=c++11 -g -c dgemm_test.cc
 
 dgels_test: dgels_test.o
-	gfortran dgels_test.o $(HOME)/Libraries/BLAS/libblas.a -o dgels_test.exe -lstdc++
+	gfortran dgels_test.o $(HOME)/Libraries/lapack-3.4.1/liblapack.a $(HOME)/Libraries/BLAS/libblas.a -o dgels_test.exe -lstdc++
 
 dgels_test.o: dgels_test.cc
 	g++ -std=c++11 -g -c dgels_test.cc
