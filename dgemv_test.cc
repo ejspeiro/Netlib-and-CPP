@@ -6,32 +6,32 @@
 /*!
 \fn dgemv_
 
-\brief Double precision General Matrix-Vector Multiplier:
+\brief Double-Precision General Format Matrix-Vector Multiplier.
 
 Performs one of the following matrix-vector operations:
 
 y := alpha*A*x + beta*y, or
 y := alpha*A'*x + beta*y.
 
-\sa http://www.math.utah.edu/software/lapack/lapack-blas/dgemv.html
+\sa http://www.math.utransah.edu/software/lapack/lapack-blas/dgemv.html
 
-\param[in]      ta      Is this the transpose of the matrix?
+\param[in]      transa  Is this matrix in row-major order?
 \param[in]      m       The number of rows of the matrix a.  m >= 0.
 \param[in]      n       The number of columns of the matrix a. n >= 0.
 \param[in]      alpha   The scalar alpha.
 \param[in,out]  a       The leading m by n part of the array.
 \param[in]      lda     The leading dimension of a. lda >= max(1,m).
 \param[in,out]  x       Array of DIMENSION at least:
-                        (1 + (n - 1)*abs(incx)), and (1 + (m - 1)*abs(incx)), if
-                        ta = 'N' or 'n'.
-\param[in]      incx    The increment for the elements of x. incx > 0.
+                        (1 + (n - 1)*abs(ix)), and (1 + (m - 1)*abs(ix)), if
+                        transa = 'N' or 'n'.
+\param[in]      incx    The increment for the elements of x. ix > 0.
 \param[in]      beta    The scalar beta.
 \param[in,out]  y       Array of DIMENSION at least:
                         (1 + (m - 1)*abs(incy)), and (1 + (n - 1)*abs(incy)), if
-                        ta = 'N' or 'n'.
+                        transa = 'N' or 'n'.
 \param[in]      incy    The increment for the elements of y. incy > 0.
 */
-extern "C" void dgemv_(char *ta,
+extern "C" void dgemv_(char *transa,
                        int *m,
                        int *n,
                        double *alpha,
@@ -51,14 +51,14 @@ int main () {
   // Explore the impact of row-wise ordering and the usage of the C++11 STL,
   // when using BLAS's dgemv_ routine.
 
-  // Dimensions of the matrices used in every test case:
-
   int mm{9};  // Rows of aa.
   int nn{2};  // Cols of aa.
 
-  // First test case: matrices with transposed data.
+  // First test case: column-major order of the matrix, i.e. transa = 'N'.
 
-  std::vector<double> aat{
+  char transa{'N'}; // Is aa's data in row-major ordering?
+
+  std::vector<double> aa_col_maj_ord{
     -1.0, 6.99999, -21.0, 35.0, -35.0, 21.0, -6.99999, 0.99999, 1.84771e-06,
     -7.00002, 48.0, -140.0, 224.0, -210.0, 112.0, -28.0, -9.428e-06, 1.0};
 
@@ -77,22 +77,26 @@ int main () {
     -0.0932962,
     0.0197727};
 
-  // These values correspond to the non-transposed versions of the matrices.
-
-  char ta{'N'}; // Is aa's data transposed, i.e. is it in row-major ordering?
+  // These values correspond to the column-major versions of the matrices.
 
   int lda{std::max(1,mm)};  // Leading dimension of the aa matrix.
-  int incx{1};              // Increment for the elements of xx. incx >= 0.
+  int incx{1};              // Increment for the elements of xx. ix >= 0.
   int incy{1};              // Increment for the elements of yy. incy >= 0.
 
-  std::cout << "aat =" << std::endl;
-  for (int ii = 0; ii < nn; ++ii) {
-    for (int jj = 0; jj < mm; ++jj) {
-      std::cout << std::setw(12) << aat[ii*mm + jj];
+  std::cout << "aa_col_maj_ord =" << std::endl;
+  if (transa == 'N') {
+    std::swap(mm,nn);
+  }
+  for (int ii = 0; ii < mm; ++ii) {
+    for (int jj = 0; jj < nn; ++jj) {
+      std::cout << std::setw(12) << aa_col_maj_ord[ii*nn + jj];
     }
     std::cout << std::endl;
   }
   std::cout << std::endl;
+  if (transa == 'N') {
+    std::swap(mm,nn);
+  }
 
   std::cout << "xx =" << std::endl;
   for (int ii = 0; ii < nn; ++ii) {
@@ -111,7 +115,8 @@ int main () {
   double alpha{-1.0}; // Scalar for the matrix.
   double beta{1.0};   // Scalar for the first vector.
 
-  dgemv_(&ta, &mm, &nn, &alpha, aat.data(), &lda, xx.data(), &incx, &beta, yy.data(), &incy);
+  dgemv_(&transa, &mm, &nn, &alpha, aa_col_maj_ord.data(), &lda,
+         xx.data(), &incx, &beta, yy.data(), &incy);
 
   std::cout << "yy =" << std::endl;
   for (int ii = 0; ii < mm; ++ii) {
@@ -119,9 +124,11 @@ int main () {
   }
   std::cout << std::endl;
 
-  // Second test case: What if we DO NOT want to transpose the input matrices?
+  // Second test case: What if we need the ordering to be row-major?
 
-  std::vector<double> aa{
+  transa = 'T'; // State that now, the input WILL be in row-wise ordering.
+
+  std::vector<double> aa_row_maj_ord{
     -1.0, -7.00002,
     6.99999, 48.0,
     -21.0, -140.0,
@@ -145,26 +152,30 @@ int main () {
     -0.0932962,
     0.0197727};
 
-  std::cout << "aa =" << std::endl;
+  if (transa == 'N') {
+    std::swap(mm,nn);
+  }
+  std::cout << "aa_row_maj_ord =" << std::endl;
   for (int ii = 0; ii < mm; ++ii) {
     for (int jj = 0; jj < nn; ++jj) {
-      std::cout << std::setw(12) << aa[ii*nn + jj];
+      std::cout << std::setw(12) << aa_row_maj_ord[ii*nn + jj];
     }
     std::cout << std::endl;
   }
   std::cout << std::endl;
-
-  // These values correspond to the TRANSPOSED versions of the matrices.
-
-  ta = 'T'; // State that now, the input WILL be in row-wise ordering.
+  if (transa == 'N') {
+    std::swap(mm,nn);
+  }
 
   // Intuition would say (as in the case for dgemm_) that we should use
   // max(1,nn). BUT this causes BLAS to issue an 'illegal value' issue. Ergo,
   // we do max(1,mm), but this yields an incorrect answer :(
 
-  lda = std::max(1,mm); // Leading dimension of the aa matrix.
-
-  dgemv_(&ta, &mm, &nn, &alpha, aat.data(), &lda, xx.data(), &incx, &beta, yy2.data(), &incy);
+  lda = std::max(1,nn); // Leading dimension of the aa matrix.
+  std::swap(mm,nn);
+  dgemv_(&transa, &mm, &nn, &alpha, aa_row_maj_ord.data(), &lda,
+         xx.data(), &incx, &beta, yy2.data(), &incy);
+  std::swap(mm,nn);
 
   std::cout << "yy =" << std::endl;
   for (int ii = 0; ii < mm; ++ii) {
@@ -172,7 +183,8 @@ int main () {
   }
   std::cout << std::endl;
 
-  // As of 2015-08-20, the matrix has to be transposed to be used.
+  // In the row-major case, we must swap the number of rows and cols to avoid
+  // transposition of the data.
 
   return EXIT_SUCCESS;
 }

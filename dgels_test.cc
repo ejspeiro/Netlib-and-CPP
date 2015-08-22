@@ -191,9 +191,31 @@ int main () {
   // When the matrix is transposed, changing the ta variable does not help. We
   // get a different solution than in the first case.
 
+  // What if we are interested in solving the system for its transpose? That is,
+  // if we assume aa := aat?
+
+  // Third case: column-wise ordering of the transpose.
+
+  std::vector<double> AAT{
+    1.0, -0.5, 0.25,  -0.125,   0.0625,
+    1.0,  0.5, 0.25,   0.125,   0.0625,
+    1.0,  1.5, 2.25,   3.375,   5.0625,
+    1.0,  2.5, 6.25,  15.625,  39.0625,
+    1.0,  3.5, 12.25, 42.875, 150.062,
+    1.0,  4.5, 20.25, 91.125, 410.062};
+
+  std::swap(mm,nn);
+
+  std::cout << "AAT =" << std::endl;
+  for (int ii = 0; ii < nn; ++ii) {
+    for (int jj = 0; jj < mm; ++jj) {
+      std::cout << std::setw(12) << AAT[ii*mm + jj];
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+
+
+
   return EXIT_SUCCESS;
 }
-
-/*
-Completed first and second cases, and updated Makefile to link with LAPACK.
-*/
