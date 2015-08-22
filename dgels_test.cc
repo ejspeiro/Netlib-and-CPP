@@ -203,5 +203,118 @@ int main () {
   }
   std::cout << std::endl;
 
+  // Third and fourth test cases.
+
+  // What if we want to solve the system for the transpose of the original
+  // matrix, given to us in an row-major ordered fashion?
+
+  ta = 'T'; // Is aat's data transposed, i.e. is it in row-major ordering?
+
+  // That would mean, swapping mm and nn!
+
+  mm = 5;
+  nn = 6;
+
+  // Data array of the aaT matrix, in row-major ordering.
+  std::vector<double> aat_row_maj_ord{
+    1.0,     1.0,    1.0,     1.0,      1.0,     1.0,
+   -0.5,     0.5,    1.5,     2.5,      3.5,     4.5,
+    0.25,    0.25,   2.25,    6.25,    12.25,   20.25,
+   -0.125,   0.125,  3.375,  15.625,   42.875,  91.125,
+    0.0625,  0.0625, 5.0625, 39.0625, 150.062, 410.062};
+
+  std::cout << "aat_row_maj_ord =" << std::endl;
+  for (int ii = 0; ii < mm; ++ii) {
+    for (int jj = 0; jj < nn; ++jj) {
+      std::cout << std::setw(12) << aat_row_maj_ord[ii*nn + jj];
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+
+  std::vector<double> xx3{0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+
+  lda = std::max(1,nn); // Leading dimension of the aat_row_maj_ord matrix.
+
+  lwork = -1;
+
+  std::swap(mm,nn);
+  dgels_(&ta, &mm, &nn, &nrhs, aat_row_maj_ord.data(), &lda,
+         xx3.data(), &ldx, ww.data(), &lwork, &info);
+  std::swap(mm,nn);
+
+  if (info != 0) {
+    return EXIT_FAILURE;
+  }
+
+  lwork = (int) ww[0];
+
+  std::cout << "Computed lwork: " << lwork << std::endl;
+  std::cout << std::endl;
+
+  ww.resize(lwork);
+
+  std::swap(mm,nn);
+  dgels_(&ta, &mm, &nn, &nrhs, aat_row_maj_ord.data(), &lda,
+         xx3.data(), &ldx, ww.data(), &lwork, &info);
+  std::swap(mm,nn);
+
+  if (info != 0) {
+    return EXIT_FAILURE;
+  }
+
+  std::cout << "xx3 =" << std::endl;
+  for (int ii = 0; ii < nn; ++ii) {
+    std::cout << std::setw(12) << xx3[ii] << std::endl;
+  }
+  std::cout << std::endl;
+
+  // Final case: What if we want to solve the system for the transpose of the
+  // original matrix, given to us in an column-major ordered fashion?
+
+  ta = 'N'; // Is aat's data in row-major ordering?
+
+  // Data array of aat matrix, in column-major ordering.
+  std::vector<double> aat_col_maj_ord{
+    1.0, -0.5, 0.25,  -0.125,   0.0625,
+    1.0,  0.5, 0.25,   0.125,   0.0625,
+    1.0,  1.5, 2.25,   3.375,   5.0625,
+    1.0,  2.5, 6.25,  15.625,  39.0625,
+    1.0,  3.5, 12.25, 42.875, 150.062,
+    1.0,  4.5, 20.25, 91.125, 410.062};
+
+  std::vector<double> xx4{0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+
+  lda = std::max(1,mm); // Leading dimension of the aat_row_maj_ord matrix.
+
+  lwork = -1;
+
+  dgels_(&ta, &mm, &nn, &nrhs, aat_col_maj_ord.data(), &lda,
+         xx4.data(), &ldx, ww.data(), &lwork, &info);
+
+  if (info != 0) {
+    return EXIT_FAILURE;
+  }
+
+  lwork = (int) ww[0];
+
+  std::cout << "Computed lwork: " << lwork << std::endl;
+  std::cout << std::endl;
+
+  ww.resize(lwork);
+
+  dgels_(&ta, &mm, &nn, &nrhs, aat_col_maj_ord.data(), &lda,
+         xx4.data(), &ldx, ww.data(), &lwork, &info);
+
+  if (info != 0) {
+    return EXIT_FAILURE;
+  }
+
+  std::cout << "xx4 =" << std::endl;
+  for (int ii = 0; ii < nn; ++ii) {
+    std::cout << std::setw(12) << xx4[ii] << std::endl;
+  }
+  std::cout << std::endl;
+
   return EXIT_SUCCESS;
 }
