@@ -68,37 +68,43 @@ int main () {
   // Explore the impact of row-wise ordering and the usage of the C++11 STL,
   // when using LAPACK's dgels_ routine.
 
-  // Dimensions of the matrices used in every test case:
-
   int mm{6};  // Rows of aa.
   int nn{5};  // Cols of aa.
 
-  // First test case: matrices with transposed data.
-
-  int ldx_options[] = {1, mm, nn};
-  int ldx{*std::max_element(ldx_options, ldx_options + 3)}; // LD of xx vector.
-
-  std::vector<double> xx{0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+  // First test case: matrices with column-major ordering data.
 
   char ta{'N'}; // Is aa's data transposed, i.e. is it in row-major ordering?
 
-  int lda{std::max(1,mm)};  // Leading dimension of the aa matrix.
+  std::vector<double> xx{0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; // xx vector.
 
-  std::vector<double> aat{
+  // These values correspond to the column-major versions of the matrices.
+
+  int lda{std::max(1,mm)};                                  // LD of aa matrix.
+  int ldx_options[] = {1, mm, nn};                          // Used to get LD.
+  int ldx{*std::max_element(ldx_options, ldx_options + 3)}; // LD of xx vector.
+
+  // Data array of the aa matrix, in column-major ordering.
+  std::vector<double> aa_col_maj_ord{
     1.0,     1.0,    1.0,     1.0,      1.0,     1.0,
    -0.5,     0.5,    1.5,     2.5,      3.5,     4.5,
     0.25,    0.25,   2.25,    6.25,    12.25,   20.25,
    -0.125,   0.125,  3.375,  15.625,   42.875,  91.125,
     0.0625,  0.0625, 5.0625, 39.0625, 150.062, 410.062};
 
-  std::cout << "aat =" << std::endl;
-  for (int ii = 0; ii < nn; ++ii) {
-    for (int jj = 0; jj < mm; ++jj) {
-      std::cout << std::setw(12) << aat[ii*mm + jj];
+  std::cout << "aa_col_maj_ord =" << std::endl;
+  if (ta == 'N') {
+    std::swap(mm,nn);
+  }
+  for (int ii = 0; ii < mm; ++ii) {
+    for (int jj = 0; jj < nn; ++jj) {
+      std::cout << std::setw(12) << aa_col_maj_ord[ii*nn + jj];
     }
     std::cout << std::endl;
   }
   std::cout << std::endl;
+  if (ta == 'N') {
+    std::swap(mm,nn);
+  }
 
   int nrhs{1};  // Number of arrays on the right-hand side matrix.
 
@@ -108,10 +114,11 @@ int main () {
 
   std::vector<double> ww(1);  // Working memory for the dgels_ solver.
 
-  int info{};
-  int lwork{-1};
+  int info{};     // Outcome of the querying process.
+  int lwork{-1};  // Length of the work array. If -1, the go into inquire mode.
 
-  dgels_(&ta, &mm, &nn, &nrhs, aat.data(), &lda, xx.data(), &ldx, ww.data(), &lwork, &info);
+  dgels_(&ta, &mm, &nn, &nrhs, aa_col_maj_ord.data(), &lda,
+         xx.data(), &ldx, ww.data(), &lwork, &info);
 
   if (info != 0) {
     return EXIT_FAILURE;
@@ -124,7 +131,8 @@ int main () {
 
   ww.resize(lwork);
 
-  dgels_(&ta, &mm, &nn, &nrhs, aat.data(), &lda, xx.data(), &ldx, ww.data(), &lwork, &info);
+  dgels_(&ta, &mm, &nn, &nrhs, aa_col_maj_ord.data(), &lda,
+         xx.data(), &ldx, ww.data(), &lwork, &info);
 
   if (info != 0) {
     return EXIT_FAILURE;
@@ -136,34 +144,38 @@ int main () {
   }
   std::cout << std::endl;
 
-  // Second test case: What if we DO NOT want to transpose the input matrices?
-
-  std::vector<double> xx2{0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
-
-  std::vector<double> aa{
-    1.0, -0.5, 0.25,  -0.125,   0.0625,
-    1.0,  0.5, 0.25,   0.125,   0.0625,
-    1.0,  1.5, 2.25,   3.375,   5.0625,
-    1.0,  2.5, 6.25,  15.625,  39.0625,
-    1.0,  3.5, 12.25, 42.875, 150.062,
-    1.0,  4.5, 20.25, 91.125, 410.062};
-
-  std::cout << "aa =" << std::endl;
-  for (int ii = 0; ii < mm; ++ii) {
-    for (int jj = 0; jj < nn; ++jj) {
-      std::cout << std::setw(12) << aa[ii*nn + jj];
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
+  // Second test case: What if we have a row-major ordered input matrix?
 
   ta = 'T'; // Is aa's data transposed, i.e. is it in row-major ordering?
 
-  lda = std::max(1,mm); // Leading dimension of the aa matrix.
+  // Data array of aa matrix, in row-major ordering.
+  std::vector<double> aa_row_maj_ord{
+    1.0, -0.5, 0.25,  -0.125,   0.0625,
+    1.0,  0.5, 0.25,   0.125,   0.0625,
+    1.0,  1.5, 2.25,   3.375,   5.0625,
+    1.0,  2.5, 6.25,  15.625,  39.0625,
+    1.0,  3.5, 12.25, 42.875, 150.062,
+    1.0,  4.5, 20.25, 91.125, 410.062};
+
+  std::cout << "aa_row_maj_ord =" << std::endl;
+  for (int ii = 0; ii < mm; ++ii) {
+    for (int jj = 0; jj < nn; ++jj) {
+      std::cout << std::setw(12) << aa_row_maj_ord[ii*nn + jj];
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+
+  std::vector<double> xx2{0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+
+  lda = std::max(1,nn); // Leading dimension of the aa_row_maj_ord matrix.
 
   lwork = -1;
 
-  dgels_(&ta, &mm, &nn, &nrhs, aa.data(), &lda, xx2.data(), &ldx, ww.data(), &lwork, &info);
+  std::swap(mm,nn);
+  dgels_(&ta, &mm, &nn, &nrhs, aa_row_maj_ord.data(), &lda,
+         xx2.data(), &ldx, ww.data(), &lwork, &info);
+  std::swap(mm,nn);
 
   if (info != 0) {
     return EXIT_FAILURE;
@@ -176,42 +188,18 @@ int main () {
 
   ww.resize(lwork);
 
-  dgels_(&ta, &mm, &nn, &nrhs, aa.data(), &lda, xx.data(), &ldx, ww.data(), &lwork, &info);
+  std::swap(mm,nn);
+  dgels_(&ta, &mm, &nn, &nrhs, aa_row_maj_ord.data(), &lda,
+         xx2.data(), &ldx, ww.data(), &lwork, &info);
+  std::swap(mm,nn);
 
   if (info != 0) {
     return EXIT_FAILURE;
   }
 
-  std::cout << "xx =" << std::endl;
-  for (int ii = 0; ii < mm; ++ii) {
-    std::cout << std::setw(12) << xx[ii] << std::endl;
-  }
-  std::cout << std::endl;
-
-  // When the matrix is transposed, changing the ta variable does not help. We
-  // get a different solution than in the first case.
-
-  // What if we are interested in solving the system for its transpose? That is,
-  // if we assume aa := aat?
-
-  // Third case: column-wise ordering of the transpose.
-
-  std::vector<double> AAT{
-    1.0, -0.5, 0.25,  -0.125,   0.0625,
-    1.0,  0.5, 0.25,   0.125,   0.0625,
-    1.0,  1.5, 2.25,   3.375,   5.0625,
-    1.0,  2.5, 6.25,  15.625,  39.0625,
-    1.0,  3.5, 12.25, 42.875, 150.062,
-    1.0,  4.5, 20.25, 91.125, 410.062};
-
-  std::swap(mm,nn);
-
-  std::cout << "AAT =" << std::endl;
+  std::cout << "xx2 =" << std::endl;
   for (int ii = 0; ii < nn; ++ii) {
-    for (int jj = 0; jj < mm; ++jj) {
-      std::cout << std::setw(12) << AAT[ii*mm + jj];
-    }
-    std::cout << std::endl;
+    std::cout << std::setw(12) << xx2[ii] << std::endl;
   }
   std::cout << std::endl;
 

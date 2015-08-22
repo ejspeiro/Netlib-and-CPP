@@ -10,8 +10,8 @@
 
 Performs one of the following matrix-vector operations:
 
-y := alpha*A*x + beta*y, or
-y := alpha*A'*x + beta*y.
+y := alpha*a*x + beta*y, or
+y := alpha*a'*x + beta*y.
 
 \sa http://www.math.utransah.edu/software/lapack/lapack-blas/dgemv.html
 
@@ -52,19 +52,20 @@ int main () {
   // when using BLAS's dgemv_ routine.
 
   int mm{9};  // Rows of aa.
-  int nn{2};  // Cols of aa.
+  int nn{2};  // Columns of aa.
 
   // First test case: column-major order of the matrix, i.e. transa = 'N'.
 
   char transa{'N'}; // Is aa's data in row-major ordering?
 
+  // Data array of the aa matrix, in column-major ordering.
   std::vector<double> aa_col_maj_ord{
     -1.0, 6.99999, -21.0, 35.0, -35.0, 21.0, -6.99999, 0.99999, 1.84771e-06,
     -7.00002, 48.0, -140.0, 224.0, -210.0, 112.0, -28.0, -9.428e-06, 1.0};
 
   std::vector<double> xx{
     -0.0932962,
-    0.0197727};
+    0.0197727}; // Input vector.
 
   std::vector<double> yy{
     -0.892509,
@@ -75,7 +76,7 @@ int main () {
     0.0245964,
     0.131729,
     -0.0932962,
-    0.0197727};
+    0.0197727}; // Input vector.
 
   // These values correspond to the column-major versions of the matrices.
 
@@ -137,9 +138,7 @@ int main () {
     21.0, 112.0,
     -6.99999, -28.0,
     0.99999, -9.428e-06,
-    1.84771e-06, 1.0};
-
-  // Redeclare yy for the second test (it got rewritten).
+    1.84771e-06, 1.0};  // Data array of the aa matrix, in row-major ordering.
 
   std::vector<double> yy2{
     -0.892509,
@@ -150,7 +149,7 @@ int main () {
     0.0245964,
     0.131729,
     -0.0932962,
-    0.0197727};
+    0.0197727}; // Redeclare yy for the second test (it got rewritten).
 
   if (transa == 'N') {
     std::swap(mm,nn);
@@ -169,7 +168,8 @@ int main () {
 
   // Intuition would say (as in the case for dgemm_) that we should use
   // max(1,nn). BUT this causes BLAS to issue an 'illegal value' issue. Ergo,
-  // we do max(1,mm), but this yields an incorrect answer :(
+  // we do max(1,mm), but this yields an incorrect answer :( For that, we swap
+  // the rows, and the leading dimension.
 
   lda = std::max(1,nn); // Leading dimension of the aa matrix.
   std::swap(mm,nn);
@@ -184,7 +184,7 @@ int main () {
   std::cout << std::endl;
 
   // In the row-major case, we must swap the number of rows and cols to avoid
-  // converting the ordering of the data.
+  // converting the ordering of the data, as well as the lda :)
 
   return EXIT_SUCCESS;
 }
