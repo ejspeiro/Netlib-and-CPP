@@ -184,7 +184,7 @@ int main () {
   std::cout << std::endl;
 
   // In the row-major case, we must swap the number of rows and cols to avoid
-  // transposition of the data.
+  // converting the ordering of the data.
 
   return EXIT_SUCCESS;
 }
