@@ -7,7 +7,10 @@ C++11's STL containers.
 
 The routines mainly come from the BLAS and the LAPACK APIs.
 
-The selection criterion does not matter for now.
+I am mainly interested in 3 of the routines... this is because these will be
+used in another project of mine... BUT these 3 files should give anyone a
+concise look in how to exploit value ordering and the STL, to use the BLAS and
+the LAPACK in a way that no wrappers are need, OR to create your own wrappers.
 
 Enjoy!
 
