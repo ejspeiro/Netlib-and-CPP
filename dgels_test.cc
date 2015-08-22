@@ -6,7 +6,7 @@
 #include <algorithm>
 
 /*!
-\brief Double-Precision General Matrix Overdetermined or Underdetermined Solver.
+\brief Double-precision GEneral matrix Least Squares solver.
 
 DGELS solves overdetermined or underdetermined real linear systems involving an
 M-by-N matrix A, or its transpose, using a QR or LQ factorization of A.  It is

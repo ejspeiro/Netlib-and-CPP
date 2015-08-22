@@ -6,7 +6,7 @@
 /*!
 \fn dgemv_
 
-\brief Double-Precision General-Format Matrix-Matrix multiplier.
+\brief Double-precision GEneral matrices Matrix-Matrix multiplier.
 
 Performs:
 
