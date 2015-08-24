@@ -69,13 +69,10 @@ int main () {
   char tb{'N'}; // Is bb's data transposed, i.e. is it in row-major ordering?
 
   // Data array of the aa matrix, in column-major ordering.
-  std::vector<double> aa_col_maj_ord{
-    -0.0263766,  0.150229, -0.313059,  0.200632, 0.281068, -0.650341, 0.537914,  -0.214473,   0.0344071,
-     0.0233982, -0.156083,  0.437434, -0.657155, 0.549301, -0.221726, 0.00200615, 0.0305288, -0.00770386};
+  std::vector<double> aa_col_maj_ord{-0.0263766, 0.150229, -0.313059, 0.200632, 0.281068, -0.650341, 0.537914, -0.214473, 0.0344071, 0.0233982, -0.156083, 0.437434, -0.657155, 0.549301, -0.221726, 0.00200615, 0.0305288, -0.00770386};
 
-  std::vector<double> bb_col_maj_ord{
-    -12.8,    -57.1678,
-    -50.724, -356.35};  // Data array of bb matrix, in column-major ordering.
+  // Data array of bb matrix, in column-major ordering.
+  std::vector<double> bb_col_maj_ord{-12.8, -57.1678, -50.724, -356.35};
 
   // These values correspond to the column-major versions of the matrices.
 
@@ -123,14 +120,20 @@ int main () {
   dgemm_(&ta, &tb, &mm, &nn, &kk, &alpha, aa_col_maj_ord.data(), &lda,
          bb_col_maj_ord.data(), &ldb, &beta, cc_col_maj_ord.data(), &ldc);
 
+  std::cout << "Test 1:" << std::endl;
+  std::cout << std::endl;
+
   std::cout << "cc_col_maj_ord =" << std::endl;
+  std::swap(cc_num_rows,cc_num_cols);
   for (int ii = 0; ii < cc_num_rows; ++ii) {
     for (int jj = 0; jj < cc_num_cols; ++jj) {
-      std::cout << std::setw(12) << cc_col_maj_ord[ii*cc_num_cols + jj];
+      double vv = cc_col_maj_ord[ii*cc_num_cols + jj];
+      std::cout << std::setw(12) << vv;
     }
     std::cout << std::endl;
   }
   std::cout << std::endl;
+  std::swap(cc_num_rows,cc_num_cols);
 
   // Output matrix will be given in column-major ordering.
 
@@ -160,10 +163,15 @@ int main () {
   ldb = std::max(1,nn);
   ldc = std::max(1,mm);
 
+
   dgemm_(&ta, &tb, &mm, &nn, &kk, &alpha, aa_row_maj_ord.data(), &lda,
-         bb_row_maj_ord.data(), &ldb, &beta, cc_col_maj_ord.data(), &ldc);
+         bb_col_maj_ord.data(), &ldb, &beta, cc_col_maj_ord.data(), &ldc);
+
+  std::cout << "Test 2:" << std::endl;
+  std::cout << std::endl;
 
   std::cout << "cc_col_maj_ord =" << std::endl;
+  std::swap(cc_num_rows,cc_num_cols);
   for (int ii = 0; ii < cc_num_rows; ++ii) {
     for (int jj = 0; jj < cc_num_cols; ++jj) {
       std::cout << std::setw(12) << cc_col_maj_ord[ii*cc_num_cols + jj];
@@ -171,6 +179,7 @@ int main () {
     std::cout << std::endl;
   }
   std::cout << std::endl;
+  std::swap(cc_num_rows,cc_num_cols);
 
   // The product matrix will always be col-major ordered! ;)
 
